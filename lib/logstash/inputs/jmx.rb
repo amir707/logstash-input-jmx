@@ -3,6 +3,9 @@ require "logstash/inputs/base"
 require "logstash/namespace"
 require "logstash/json"
 
+require ''+File.dirname(File.absolute_path(__FILE__))+'/../../../'+'vendor/jar-dependencies/weblogic-client/wlfullclient.jar'
+
+
 # This input plugin permits to retrieve metrics from remote Java applications using JMX.
 # Every `polling_frequency`, it scans a folder containing json configuration 
 # files describing JVMs to monitor with metrics to retrieve.
@@ -89,6 +92,8 @@ require "logstash/json"
 #       "metric_value_string" => "java.nio:type=BufferPool,name=mapped"
 #     }
 #
+java_import java.lang.System
+   
 class LogStash::Inputs::Jmx < LogStash::Inputs::Base
   config_name 'jmx'
 
@@ -195,9 +200,18 @@ class LogStash::Inputs::Jmx < LogStash::Inputs::Base
     queue << event
   end
 
+#java_import 'weblogic.management.remote.common.WLSRMIConnector' 
+
   # Thread function to retrieve metrics from JMX
   private
   def thread_jmx(queue_conf,queue)
+    System.setProperty("jmx.remote.protocol.provider.pkgs", "weblogic.management.remote")
+    @logger.info("Hey, Now you could use me to connect to weblogic via t3 protocol!")
+    #@logger.info("where I am expecting wlfullclient.jar is "''+File.dirname(File.absolute_path(__FILE__))+'/../../../'+'vendor/jar-dependencies/weblogic-client/wlfullclient.jar')
+    #Class dd =Class.forName("weblogic.management.remote.common.WLSRMIConnector")
+    #dd = Java::weblogic::management::remote::common::WLSRMIConnector::CREDENTIALS
+	
+   
     while true
       begin
         @logger.debug('Wait config to retrieve from queue conf')
@@ -313,7 +327,7 @@ class LogStash::Inputs::Jmx < LogStash::Inputs::Base
   def register
     require 'thread'
     require 'jmx4r'
-
+    
     @logger.info("Create queue dispatching JMX requests to threads")
     @queue_conf = Queue.new
 

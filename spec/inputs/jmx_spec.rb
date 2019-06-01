@@ -5,7 +5,13 @@ require "logstash/codecs/plain"
 require 'stud/temporary'
 require "jmx4r"
 
+require ''+File.dirname(File.absolute_path(__FILE__))+'/../../../'+'vendor/jar-dependencies/weblogic-client/wlfullclient.jar'
+
+
+
 describe LogStash::Inputs::Jmx do
+
+  System.setProperty("jmx.remote.protocol.provider.pkgs", "weblogic.management.remote")
 
   let(:jmx_config_path) { Stud::Temporary.directory }
   after(:each) do
